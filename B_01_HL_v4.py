@@ -70,11 +70,6 @@ def calc_guesses(low, high):
     return max_guesses
 
 
-def secret_num():
-    number = random.randint(low_num, high_num)
-    return number
-
-
 # Instructions
 
 def instructions():
@@ -100,9 +95,10 @@ def instructions():
 
 mode = "regular"
 rounds_played = 0
-guesses_used = 0
-already_guessed = []
 game_history = []
+game_stats = []
+
+end_game = "no"
 
 print()
 print("👆👆 Higher or lower 👇👇")
@@ -118,7 +114,7 @@ num_rounds = int_checker("How many rounds would you like? Push <enter> for infin
 
 if num_rounds == "":
     mode = "infinite"
-    num_rounds = rounds_played +1
+    num_rounds = 10
 
 # Get game parameters
 low_num = int_checker("Choose a low number to guess from: ")
@@ -127,18 +123,23 @@ high_num = int_checker("Choose a high number to guess from: ", low=low_num + 1)
 guesses_allowed = calc_guesses(low_num, high_num)
 
 # Game loop starts here
-while rounds_played < num_rounds:
+while rounds_played < num_rounds and end_game == "no":
+
+    guesses_used = 0
+    already_guessed = []
 
     if mode == "infinite":
         rounds_heading = f"\n ♾♾♾ Round {rounds_played + 1} (Infinite mode) ♾♾♾"
+        num_rounds += 1
     else:
         rounds_heading = f"\n 🕰🕰🕰 Round {rounds_played + 1} (Regular mode) 🕰🕰🕰 "
 
     print(rounds_heading)
     print()
 
-    guessing_num = secret_num()
+    guessing_num = random.randint(low_num, high_num)
     print(f"Spoiler alert: {guessing_num}")
+
     guess = ""
 
     while guess != guessing_num and guesses_used != guesses_allowed:
@@ -187,14 +188,51 @@ while rounds_played < num_rounds:
             print()
             print("💣 Careful! You only have one guess left! 💣")
 
+    if guesses_used == 1:
+        game_result = f" 🍀 Round {rounds_played + 1}: You used {guesses_used} / {guesses_allowed} guesses. Lucky! 🍀"
+    elif guesses_used == guesses_allowed:
+        game_result = f" 😋 Round {rounds_played + 1}: You used {guesses_used} / {guesses_allowed} guesses. Phew! 😋"
+    elif guesses_used > guesses_allowed:
+        game_result = f"Round {rounds_played + 1} result : You used {guesses_used} / {guesses_allowed} guesses! You lost"
+    else:
+        f"Round {rounds_played + 1} result : You used {guesses_used} / {guesses_allowed} guesses."
+
+    if guesses_used == guesses_allowed:
+        game_stats.append(guesses_used + 1)
+    else:
+        game_stats.append(guesses_used)
+    print(game_stats)
+
+    game_history.append(game_result)
+
     rounds_played += 1
+
+# if user chooses infinite mode, add +1 rounds to num rounds so num_rounds is never = to rounds_played
 
 if mode == "infinite":
     num_rounds += 1
 
-# if user chooses infinite mode, add +1 rounds to num rounds so num_rounds is never = to rounds_played
-
-
 # Game loop ends here
 
-# Game stats
+if num_rounds == rounds_played:
+    Sum = sum(game_stats)
+    Min = min(game_stats)
+    Max = max(game_stats)
+    Average = sum(game_stats) / rounds_played
+
+    print("📈 Game Stats 📉")
+    print()
+    print(f"Total Score = {Sum}")
+    print()
+    print(f"Best Score = {Min} \t"
+          f"Worst Score = {Max} \t"
+          f"Average Score = {Average:.0f}")
+
+    want_history = yes_no("Do you want to view your game history?")
+
+    if want_history == "yes":
+
+        for item in game_history:
+            print(item)
+
+    print("Thank you for playing!")
